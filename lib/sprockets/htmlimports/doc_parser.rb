@@ -19,7 +19,6 @@ module Sprockets
 
       def select(filter_map, &block)
         matches = filter_map.map do |filter_type, filter|
-          puts "#{filter_type}: #{filter.inspect}"
           tag_name, attr_filters = filter[0], filter[1..-1]
           nodes = @nodes_by_tag_name[tag_name].select do |node|
             attr_filters_match? attr_filters, node
