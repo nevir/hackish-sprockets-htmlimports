@@ -4,6 +4,7 @@ module Sprockets
   module HTMLImports
     class DocParser
       Replacement = Struct.new(:node, :new_content)
+      FilterMatch = Struct.new(:node, :filter_type)
 
       # WARNING: Modifies `data`!
       def initialize(data, interesting_tag_names)
@@ -16,26 +17,27 @@ module Sprockets
         index_interesting_tags(@doc, interesting_tag_names)
       end
 
-      def select(tag_name, *filters)
-        filters = Array(filters).flatten
-        @nodes_by_tag_name[tag_name].select do |node|
-          filters.any? do |filter|
-            filter.all? do |key, value|
-              attribute = node.attribute(key.to_s)
-
-              case value
-              when TrueClass then !!attribute
-              when FalseClass then !attribute
-              else attribute && attribute.value == value
-              end
-            end
+      def select(filter_map, &block)
+        matches = filter_map.map do |filter_type, filter|
+          puts "#{filter_type}: #{filter.inspect}"
+          tag_name, attr_filters = filter[0], filter[1..-1]
+          nodes = @nodes_by_tag_name[tag_name].select do |node|
+            attr_filters_match? attr_filters, node
           end
+
+          nodes.map { |n| FilterMatch.new(n, filter_type) }
+        end.flatten
+
+        matches.sort_by! { |m| m.node.offset_range.min }
+        matches.each do |match|
+          block.call(match.node, match.filter_type)
         end
       end
 
-      def replace(tag_name, *filters, &block)
-        select(tag_name, *filters).each do |node|
-          new_content = block.call(node)
+      def replace(filter_map, &block)
+        select(filter_map) do |node, filter_type|
+          new_content = block.call(node, filter_type)
+          next unless new_content
           @replacements << Replacement.new(node, new_content) if new_content
         end
       end
@@ -54,6 +56,20 @@ module Sprockets
       end
 
       protected
+
+      def attr_filters_match?(attr_filters, node)
+        attr_filters.any? do |attr_filter|
+          attr_filter.all? do |key, value|
+            attribute = node.attribute(key.to_s)
+
+            case value
+            when TrueClass then !!attribute
+            when FalseClass then !attribute
+            else attribute && attribute.value == value
+            end
+          end
+        end
+      end
 
       # TODO(imac): Recursion is probably a bad idea. Flatten out to a stack.
       def index_interesting_tags(node, interesting_tag_names)
