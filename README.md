@@ -30,7 +30,7 @@ For a rails project, add this to your `production.rb`:
 Ok, What's It Do?
 -----------------
 
-At`sprockets-htmlimports` parses `.html` files for their dependencies,
+`sprockets-htmlimports` parses `.html` files for their dependencies,
 expressed via:
 
 * `<link href="..." rel="import">`
