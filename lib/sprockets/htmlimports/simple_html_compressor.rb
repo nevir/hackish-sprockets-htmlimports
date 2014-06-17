@@ -3,7 +3,7 @@ require 'sprockets/htmlimports/base_processor'
 
 module Sprockets
   module HTMLImports
-    class HTMLCompressor < BaseProcessor
+    class SimpleHTMLCompressor < BaseProcessor
       COPYRIGHT_MATCHER = /copyright/i
 
       def prepare

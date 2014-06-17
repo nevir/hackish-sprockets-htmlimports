@@ -33,7 +33,6 @@ module Sprockets
       end
 
       def remove_node(node)
-        # TODO(imac): Actually remove; only comment in debug mode.
         "<!-- sprockets-htmlimports: #{node.original_tag} -->"
       end
     end
