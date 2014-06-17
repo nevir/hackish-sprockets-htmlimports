@@ -9,6 +9,7 @@ module Sprockets
       # WARNING: Modifies `data`!
       def initialize(data, interesting_tag_names)
         @nodes_by_tag_name = Hash.new { |h,k| h[k] = [] }
+        @nodes_by_type     = Hash.new { |h,k| h[k] = [] }
         @replacements = []
 
         @data = data.encode('UTF-8')
@@ -19,18 +20,29 @@ module Sprockets
 
       def select(filter_map, &block)
         matches = filter_map.map do |filter_type, filter|
-          tag_name, attr_filters = filter[0], filter[1..-1]
-          nodes = @nodes_by_tag_name[tag_name].select do |node|
-            attr_filters_match? attr_filters, node
-          end
-
-          nodes.map { |n| FilterMatch.new(n, filter_type) }
+          select_filter(*filter).map { |n| FilterMatch.new(n, filter_type) }
         end.flatten
 
         matches.sort_by! { |m| m.node.offset_range.min }
         matches.each do |match|
           block.call(match.node, match.filter_type)
         end
+      end
+
+      def select_filter(filter_type, *attr_filters)
+        if filter_type.is_a? Class
+          return @nodes_by_type[filter_type]
+        end
+
+        if attr_filters.size == 0
+          nodes = @nodes_by_tag_name[filter_type]
+        else
+          nodes = @nodes_by_tag_name[filter_type].select do |node|
+            attr_filters_match? attr_filters, node
+          end
+        end
+
+        nodes
       end
 
       def replace(filter_map, &block)
@@ -77,6 +89,10 @@ module Sprockets
           if interesting_tag_names.include? name
             @nodes_by_tag_name[name] << node
           end
+        end
+
+        if interesting_tag_names.include? node.class
+          @nodes_by_type[node.class] << node
         end
 
         if node.respond_to? :children
