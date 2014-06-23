@@ -15,12 +15,7 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ['lib']
 
-  # Until/if https://github.com/galdor/ruby-gumbo/pull/5 is merged, you must
-  # require this gem via git. Add the following to your Gemfile:
-  #
-  #   gem 'ruby-gumbo', git: 'https://github.com/nevir/ruby-gumbo'
-  #
-  spec.add_runtime_dependency 'ruby-gumbo', '~> 1.1.rc1'
+  spec.add_runtime_dependency 'ruby-gumbo', '~> 1.1'
   spec.add_runtime_dependency 'sprockets', '~> 2.8'
 
   spec.add_development_dependency 'bundler', '~> 1.6'

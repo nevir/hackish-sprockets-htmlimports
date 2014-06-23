@@ -17,7 +17,6 @@ Add `sprockets-htmlimports` (and _bleeding edge dependencies_) to your
 `Gemfile`:
 
     gem 'sprockets-htmlimports', git: 'https://github.com/nevir/sprockets-htmlimports'
-    gem 'ruby-gumbo', git: 'https://github.com/nevir/ruby-gumbo'
 
 That's all you need for basic support. You may also want to enable HTML
 compression by setting `html_compressor = :simple` in the usual spot.
